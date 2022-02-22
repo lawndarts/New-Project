@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block body %}
+<div class="content">
+    <h1>Lets try to print some data really pretty like</h1>
+    <form method="get" action="/auth/">
+        <button type="submit">Continue</button>
+    </form>
+    {% if tasks|length < 1 %}
+
+    {% else %}
+        <!-- left this as an example -->
+    {% endif %}
+
+    
+</div>
+{% endblock %}
