@@ -5,18 +5,15 @@
 {% endblock %}
 
 {% block body %}
-<div class="content">
-    <h1>Lets try to print some data using JS</h1>
-    <form method="get" action="/chart">
-        <button type="submit">Continue</button>
-    </form>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-4">
+      <canvas id="myChart" style="width:100%;max-width:600px"></canvas>
+    </div>
+  </div>
 </div>
-<div>
-    <h4>at least it ran</h4>
-</div>
-<div>
-    <canvas id="myChart" style="width:100%;max-width:600px"></canvas>
-</div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -24,30 +21,45 @@
 
 <script type=text/javascript>
     var dict = JSON.parse('{{  jsdict  | tojson | safe  }}')
+    var topSubs = JSON.parse('{{  topSubs  | tojson | safe  }}')
     console.log(dict)
-    var xValues = Object.keys(dict)
-    var yValues = Object.values(dict)
-    var barColors = "blue";
+    // var xValues = Object.keys(dict)
+    // var yValues = Object.values(dict)
+    dict = {
+        'Sunday': dict.Sunday,
+        'Monday': dict.Monday,
+        'Tuesday': dict.Tuesday,
+        'Wednesday': dict.Wednesday,
+        'Thursday': dict.Thursday,
+        'Friday': dict.Friday,
+        'Saturday': dict.Saturday
 
-    new Chart("myChart", {
-            type: "bar",
-            data: {
-                labels: xValues,
-                datasets: [{
-                backgroundColor: barColors,
-                data: yValues
-                }]
-            },
-            options: {
-                legend: {display: false},
-                title: {
-                display: true,
-                text: "Comment distribution by weekday"
-                }
-            }
-    });
+    }
+    console.log(dict)
+    const labels = Object.keys(dict)
+
+  const data = {
+    labels: labels,
+    datasets: [{
+      label: 'What days do I post the most?',
+      backgroundColor: 'rgb(255, 99, 132)',
+      borderColor: 'rgb(255, 99, 132)',
+      data: Object.values(dict),
+    }]
+  };
+
+  const config = {
+    type: 'bar',
+    data: data,
+    options: {
+
+    }
+  };
+
+  const myChart = new Chart(
+    document.getElementById('myChart'),
+    config
+  );
 </script>
-
-
 
 {% endblock %}

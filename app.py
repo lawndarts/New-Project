@@ -22,12 +22,10 @@ reddit = praw.Reddit(
     client_id = 'tC-RStYYMyOXAVgtuVy3cA',
     client_secret = 'XIJwrc-zKpm-kMB7aR0MCE3DvDGpRw',
     redirect_uri="http://127.0.0.1:5000/auth",
-    user_agent="obtain_refresh_token testing by u/Solid-Guidance1826 Im sorry, Im bad at this and hope I dont break any rules",
+    user_agent="obtain_refresh_token testing by u/Solid-Guidance1826 Im sorry, Im bad at this. contact:henryp959@gmail.com",
 )
 state = str(random.randint(0, 65000))
-# url = reddit.auth.url(scopes, state, "permanent") sending request later
 
-# print(f"Now open this url in your browser: {url}")
 
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -58,14 +56,25 @@ def auth():
 #                       headers = {'User-agent':app.config['USER_AGENT'],'Content-Type':'application/x-www-form-urlencoded'},
 #                       data = {'token':token,'token_type_hint':tokentype})
 
+
+@app.route('/login')
+def login():
+    return redirect(reddit.auth.url(scopes, state, "permanent"))
+
+#doesnt do anything yet
+@app.route('/logout')
+def logout():
+    return redirect(url_for('app.index'))
+
 @app.route('/chart')
 def showChart():
     jsdict = postingActivityDay()
-    return render_template('showSomething.html', jsdict=jsdict)
+    topSubs = topTenSubreddits()
+    return render_template('showSomething.html', jsdict=jsdict, topSubs = topSubs)
 
 def postingActivityDay():
     supportSubs = ['test', 'videos','pcgaming']
-    DoTW = {}
+    DoTW = {'Sunday': 0, 'Monday': 0, 'Tuesday': 0, 'Wednesday': 0, 'Thursday': 0, 'Friday': 0, 'Saturday': 0,}
     comments =  reddit.user.me().comments.new(limit=50)
     for comment in comments:
         if(str(comment.subreddit) in supportSubs):
@@ -78,27 +87,22 @@ def postingActivityDay():
             elif(day == 4): day = 'Thursday'
             elif(day == 5): day = 'Friday'
             elif(day == 6): day = 'Saturday'
-            print(day)
             if(day in DoTW):
                 DoTW[day] += 1
-            else:
-                DoTW[day] = 1
     return DoTW
 
-@app.route('/huh', methods=['GET'])
-def huh():
-    
-    return render_template('auth.html')
 
-
-@app.route('/login')
-def login():
-    return redirect(reddit.auth.url(scopes, state, "permanent"))
-
-@app.route('/logout')
-def logout():
-    return redirect(url_for('app.index'))
-
+def topTenSubreddits():
+    subList = {}
+    comments =  reddit.user.me().comments.new(limit=500)
+    for comment in comments:
+        if(str(comment.subreddit) in subList):
+            subList[str(comment.subreddit)] += 1
+        else:
+            subList[str(comment.subreddit)] = 1
+    topSubs = sorted(subList, key=subList.get, reverse=True)[:10]
+    return topSubs
+    #now theres a list of the top 10 subs and their values can be retrieved from a dictionary. Find out best way to return data
 
 if __name__ == "__main__":
     app.run(debug=True)
